@@ -1,5 +1,7 @@
 import pygame
 import random
+    
+pygame.mixer.init()
 
 class Ball:
     def __init__(self, x, y, width, height, screen_width, screen_height):
@@ -13,6 +15,9 @@ class Ball:
         self.screen_height = screen_height
         self.velocity_x = random.choice([-5, 5])
         self.velocity_y = random.choice([-3, 3])
+        self.sound_paddle = pygame.mixer.Sound("assets/paddle_hit.wav")
+        self.sound_wall = pygame.mixer.Sound("assets/wall_bounce.wav")
+        self.sound_score = pygame.mixer.Sound("assets/score.wav")
 
     def move(self):
         self.x += self.velocity_x
@@ -20,6 +25,8 @@ class Ball:
 
         if self.y <= 0 or self.y + self.height >= self.screen_height:
             self.velocity_y *= -1
+            self.sound_wall.play()
+
 
     def check_collision(self, player, ai):
         ball_rect = self.rect()
@@ -31,17 +38,20 @@ class Ball:
             self.velocity_x *= -1
             # Push ball outside the paddle to prevent sticking
             self.x = player_rect.x + player_rect.width
+            self.sound_paddle.play()
 
         # Check collision with AI paddle
         elif ball_rect.colliderect(ai_rect) and self.velocity_x > 0:
             self.velocity_x *= -1
             self.x = ai_rect.x - self.width
+            self.sound_paddle.play()
 
     def reset(self):
         self.x = self.original_x
         self.y = self.original_y
         self.velocity_x *= -1
         self.velocity_y = random.choice([-3, 3])
+        self.sound_score.play()
 
     def rect(self):
         return pygame.Rect(self.x, self.y, self.width, self.height)
